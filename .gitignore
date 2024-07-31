@@ -1,0 +1,34 @@
+# Python caches
+__pycache__/
+.pytest_cache/
+
+# Virtual environment
+venv/
+env/
+
+# IDE-specific files
+.idea/
+*.iml
+*.DS_Store
+
+# Local development files
+.vscode/
+.gitpod.yml
+
+# Test and coverage reports
+coverage/
+htmlcov/
+
+# Logs
+logs/
+
+# Build artifacts
+dist/
+build/
+*.egg
+*.whl
+
+# Generated files
+.pytest_cache/
+
+.env
