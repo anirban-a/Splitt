@@ -15,15 +15,17 @@ class TransactionService:
     def create_transaction(self, txn: Transaction) -> Transaction:
         # balance_id, rev_balance_id = TransactionService.__create_balance_id(txn.payer, txn.payee)
 
-        balance = self.balance_repo.find(payer=txn.payer, payee=txn.payee,
-                                         default=Balance(**{'payer': txn.payer, 'payee': txn.payee, 'amount': 0.0}))
-        rev_balance = self.balance_repo.find(payee=txn.payer, payer=txn.payee,
-                                             default=Balance(**{'payee': txn.payer, 'payer': txn.payee, 'amount': 0.0}))
+        balance, balance_id = self.balance_repo.find(payer=txn.payer, payee=txn.payee,
+                                                     default=Balance(
+                                                         **{'payer': txn.payer, 'payee': txn.payee, 'amount': 0.0}))
+        rev_balance, rev_balance_id = self.balance_repo.find(payee=txn.payer, payer=txn.payee,
+                                                             default=Balance(**{'payee': txn.payer, 'payer': txn.payee,
+                                                                                'amount': 0.0}))
         balance.amount += txn.amount
         rev_balance.amount -= txn.amount
 
-        self.balance_repo.save(balance)
-        self.balance_repo.save(rev_balance)
+        self.balance_repo.save(balance, balance_id)
+        self.balance_repo.save(rev_balance, rev_balance_id)
 
         result = self.txn_repo.save(txn)
         return self.txn_repo.find_by_id(result.inserted_id)
