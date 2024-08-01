@@ -15,8 +15,7 @@ class UserService:
         result = self.user_repo.save(user)
         inserted_id = str(result.inserted_id)
 
-        entity = self.user_repo.find_by_id(inserted_id)
-        if entity:
-            # entity['_id'] = inserted_id
-            return User.from_mongo(**entity)
-        raise Exception(f'User could not be created')
+        return self.user_repo.find_by_id(inserted_id)
+
+    def find_by_id(self, user_id: str) -> User:
+        return self.user_repo.find_by_id(user_id)

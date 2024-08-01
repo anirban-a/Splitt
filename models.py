@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class User(BaseModel):
     id: Optional[str] = Field(None, alias='_id')
     username: str
-    groups: list[str]
+    groups: Optional[list[str]] = Field(None)
 
     class Config:
         from_attributes = True
@@ -20,7 +20,7 @@ class User(BaseModel):
 
 
 class Group(BaseModel):
-    _id: str
+    id: Optional[str] = Field(None, alias='_id')
     name: str
     members: list[str]
 
@@ -36,10 +36,11 @@ class Group(BaseModel):
 
 
 class Transaction(BaseModel):
-    _id: str
+    id: Optional[str] = Field(None, alias='_id')
     payer: str
     payee: str
-    amount: float
+    amount: float = Field(0.0)
+    group_id: Optional[str] = Field(None)
 
     class Config:
         from_attributes = True

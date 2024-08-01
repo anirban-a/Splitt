@@ -6,11 +6,16 @@ from pymongo.collection import Collection
 
 from config.config import BaseConfig
 # from config.database import get_user_collection
-from models import User
+from models import User, Transaction
+from repositories.txn_repository import TransactionRepository
 from repositories.user_repository import UserRepository
+from services.txn_service import TransactionService
 from services.user_service import UserService
 
 router = APIRouter()
+
+user_router = APIRouter(prefix='/user')
+txn_router = APIRouter(prefix='/transaction')
 
 
 @lru_cache
@@ -27,6 +32,14 @@ def get_user_collection(db: database.Database = Depends(get_db)) -> Collection:
     return db.get_collection('user')
 
 
+def get_txn_collection(db: database.Database = Depends(get_db)) -> Collection:
+    return db.get_collection('transaction')
+
+
+def get_txn_repository(txn_collection: Collection = Depends(get_txn_collection)):
+    return TransactionRepository(txn_collection)
+
+
 def get_user_repository(user_collection: Collection = Depends(get_user_collection)):
     return UserRepository(user_collection)
 
@@ -35,7 +48,30 @@ def get_user_service(user_repo: UserRepository = Depends(get_user_repository)):
     return UserService(user_repo)
 
 
-@router.post("/user")
-async def root(user: User, user_service: UserService = Depends(get_user_service)):
+def get_txn_service(user_service: UserService = Depends(get_user_service),
+                    txn_repository: TransactionRepository = Depends(get_txn_repository)):
+    return TransactionService(user_service, txn_repository)
+
+
+@user_router.post("/")
+async def create_user(user: User, user_service: UserService = Depends(get_user_service)):
     _user = user_service.create_user(user)
-    return {"user": _user}
+    return _user
+
+
+@txn_router.post("/")
+async def create_txn(txn: Transaction, txn_service: TransactionService = Depends(get_txn_service)):
+    _txn = txn_service.create_transaction(txn)
+    return _txn
+
+
+router.include_router(user_router)
+router.include_router(txn_router)
+# Get total sum of money I owe to people
+# Get total sum of money owed to me
+# Get total sum of money I owe to each individual
+# Get total sum of money I owe to each individual filtered by group
+# Create a group
+# Delete a group
+# Assign a user to a group
+# Unassign a user from a group

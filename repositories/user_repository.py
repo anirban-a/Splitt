@@ -12,5 +12,6 @@ class UserRepository:
     def save(self, user: User) -> InsertOneResult:
         return self.collection.insert_one(user.model_dump())
 
-    def find_by_id(self, id: str):
-        return self.collection.find_one({'_id': ObjectId(id)})
+    def find_by_id(self, id: str) -> User:
+        entity = self.collection.find_one({'_id': ObjectId(id)})
+        return User.from_mongo(**entity)
