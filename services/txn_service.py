@@ -34,22 +34,24 @@ class TransactionService:
     individual who has payed for the payee and now making a transaction log in the application making the now payee a 
     future potential payer."""
 
-    def get_all_receivables(self, user_id: str) -> List[Transaction]:
+    def get_all_receivables(self, user_id: str) -> List[Balance]:
         # get all transactions where money is owed to user_id
-        return self.txn_repo.get_all_by_payer(user_id)
+        # return self.txn_repo.get_all_by_payer(user_id)
+        return self.balance_repo.find_all_by_payer_receivable(user_id)
 
-    def get_all_payable(self, user_id: str, group_id: str = None) -> List[Transaction]:
-        return self.txn_repo.get_all_by_payee(user_id) if not group_id else self.txn_repo.get_all_by_payee_and_group(
-            user_id, group_id)
+    def get_all_payable(self, user_id: str, group_id: str = None) -> List[Balance]:
+        return self.balance_repo.find_all_by_payer_payable(user_id, group_id)
 
     def compute_total_receivables(self, user_id: str) -> float:
         ''' Calculate the total sum of money owed to the user by others. '''
-        total_balance = sum(map(lambda txn: txn.amount, self.get_all_receivables(user_id))) - sum(
-            map(lambda txn: txn.amount, self.get_all_payable(user_id)))
+        # total_balance = sum(map(lambda txn: txn.amount, self.get_all_receivables(user_id))) - sum(
+        #     map(lambda txn: txn.amount, self.get_all_payable(user_id)))
+        total_balance = sum(map(lambda balance: balance.amount, self.get_all_receivables(user_id)))
         return max(0, total_balance)
 
     def compute_total_payable(self, user_id: str) -> float:
         ''' Calculate the total sum of money the user owes others. '''
-        total_balance = sum(map(lambda txn: txn.amount, self.get_all_payable(user_id))) - sum(
-            map(lambda txn: txn.amount, self.get_all_receivables(user_id)))
+        # total_balance = sum(map(lambda txn: txn.amount, self.get_all_payable(user_id))) - sum(
+        #     map(lambda txn: txn.amount, self.get_all_receivables(user_id)))
+        total_balance = sum(map(lambda balance: balance.amount, self.get_all_payable(user_id)))
         return max(0, total_balance)

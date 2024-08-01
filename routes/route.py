@@ -1,18 +1,19 @@
+from __future__ import annotations
+
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends
 from pymongo import MongoClient, database
 from pymongo.collection import Collection
 
-from .api_responses import BalanceResponseItem
 from config.config import BaseConfig
-# from config.database import get_user_collection
 from models import User, Transaction
 from repositories.balance_repository import BalanceRepository
 from repositories.txn_repository import TransactionRepository
 from repositories.user_repository import UserRepository
 from services.txn_service import TransactionService
 from services.user_service import UserService
+from .api_responses import BalanceResponseItem, BalanceListResponseItem
 
 router = APIRouter()
 
@@ -85,19 +86,30 @@ async def get_out_bound_balance(user_id: str, txn_service: TransactionService = 
 
 
 @txn_router.get("/in-bound-balance/{user_id}",
-                summary='Get the total sum of money other users owe to the user with `user_id`')
+                summary='Get the total sum of money other users owe to the user with `user_id`',
+                response_model=BalanceResponseItem)
 async def get_in_bound_balance(user_id: str, txn_service: TransactionService = Depends(get_txn_service)):
     balance = txn_service.compute_total_receivables(user_id)
-    return {'user_id': user_id, 'balance': balance}
+    return BalanceResponseItem(**{'user_id': user_id, 'balance': balance})
+
+
+@txn_router.get("/all-out-bound-balance/{user_id}")
+async def get_all_out_bound_balance(user_id: str, group_id: str | None = None,
+                                    txn_service: TransactionService = Depends(get_txn_service),
+                                    response_model=BalanceListResponseItem):
+    balances = txn_service.get_all_payable(user_id, group_id)
+    return BalanceListResponseItem(**{'balances': balances})
+
+    # return BalanceResponseItem(**{'user_id': user_id, 'balance': balance})
 
 
 router.include_router(user_router)
 router.include_router(txn_router)
-# Get total sum of money I owe to people
-# Get total sum of money owed to me
-# Get total sum of money I owe to each individual
-# Get total sum of money I owe to each individual filtered by group
+# Get total sum of money I owe to people -> done
+# Get total sum of money owed to me -> done
+# Get total sum of money I owe to each individual -> done
+# Get total sum of money I owe to each individual filtered by group -> done
 # Create a group
 # Delete a group
 # Assign a user to a group
-# Unassign a user from a group
+# Remove a user from a group

@@ -58,6 +58,7 @@ class Balance(BaseModel):
     payer: str
     payee: str
     amount: float = Field(default=0.0)
+    group_id: Optional[str] = Field(None)
 
     class Config:
         from_attributes = True
