@@ -7,14 +7,6 @@ from .user_service import UserService
 
 
 class TransactionService:
-    # @staticmethod
-    # def __create_balance_id(payer_id: str, payee_id: str) -> List[str]:
-    #     id_1 = b'{payer_id}{payee_id}'
-    #     id_2 = b'{payee_id}{payer_id}'
-    #     hash_1 = blake2b(id_1, digest_size=12, key=b'helloworld')
-    #     hash_2 = blake2b(id_2, digest_size=12, key=b'helloworld')
-    #     return [hash_1.hexdigest(), hash_2.hexdigest()]
-
     def __init__(self, user_service: UserService, txn_repo: TransactionRepository, balance_repo: BalanceRepository):
         self.user_service = user_service
         self.txn_repo = txn_repo

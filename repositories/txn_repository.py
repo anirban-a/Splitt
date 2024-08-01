@@ -19,10 +19,19 @@ class TransactionRepository:
         return Transaction.from_mongo(**entity)
 
     def get_all_by_payer(self, payer: str) -> List[Transaction]:
-        return list(map(Transaction.from_mongo, self.collection.find({'payer': payer})))
+        txn_cursor = self.collection.find({'payer': payer})
+        transactions = []
+        while txn_cursor.alive:
+            transactions.append(Transaction.from_mongo(**txn_cursor.next()))
+        return transactions
 
     def get_all_by_payee(self, payee: str) -> List[Transaction]:
-        return list(map(Transaction.from_mongo, self.collection.find({'payee': payee})))
+        txn_cursor = self.collection.find({'payee': payee})
+        transactions = []
+        while txn_cursor.alive:
+            transactions.append(Transaction.from_mongo(**txn_cursor.next()))
+        return transactions
+        # return list(map(lambda txn: Transaction.from_mongo(**txn), l))
 
     def get_all_by_payee_and_group(self, payee: str, group_id: str) -> List[Transaction]:
         return list(map(Transaction.from_mongo, self.collection.find({'payee': payee, 'group_id': group_id})))

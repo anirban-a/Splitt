@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from pymongo import MongoClient, database
 from pymongo.collection import Collection
 
+from .api_responses import BalanceResponseItem
 from config.config import BaseConfig
 # from config.database import get_user_collection
 from models import User, Transaction
@@ -73,6 +74,21 @@ async def create_user(user: User, user_service: UserService = Depends(get_user_s
 async def create_txn(txn: Transaction, txn_service: TransactionService = Depends(get_txn_service)):
     _txn = txn_service.create_transaction(txn)
     return _txn
+
+
+@txn_router.get("/out-bound-balance/{user_id}",
+                summary='Get the total sum of money the user with `user_id` owes to other users',
+                response_model=BalanceResponseItem)
+async def get_out_bound_balance(user_id: str, txn_service: TransactionService = Depends(get_txn_service)):
+    balance = txn_service.compute_total_payable(user_id)
+    return BalanceResponseItem(**{'user_id': user_id, 'balance': balance})
+
+
+@txn_router.get("/in-bound-balance/{user_id}",
+                summary='Get the total sum of money other users owe to the user with `user_id`')
+async def get_in_bound_balance(user_id: str, txn_service: TransactionService = Depends(get_txn_service)):
+    balance = txn_service.compute_total_receivables(user_id)
+    return {'user_id': user_id, 'balance': balance}
 
 
 router.include_router(user_router)
