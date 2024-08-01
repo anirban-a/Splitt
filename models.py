@@ -51,3 +51,20 @@ class Transaction(BaseModel):
         if '_id' in data:
             data['id'] = str(data.pop('_id'))
         return cls(**data)
+
+
+class Balance(BaseModel):
+    _id: Optional[str]
+    payer: str
+    payee: str
+    amount: float = Field(default=0.0)
+
+    class Config:
+        from_attributes = True
+        populate_by_name = True
+
+    @classmethod
+    def from_mongo(cls, **data):
+        if '_id' in data:
+            data['id'] = str(data.pop('_id'))
+        return cls(**data)

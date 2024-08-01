@@ -7,6 +7,7 @@ from pymongo.collection import Collection
 from config.config import BaseConfig
 # from config.database import get_user_collection
 from models import User, Transaction
+from repositories.balance_repository import BalanceRepository
 from repositories.txn_repository import TransactionRepository
 from repositories.user_repository import UserRepository
 from services.txn_service import TransactionService
@@ -36,8 +37,16 @@ def get_txn_collection(db: database.Database = Depends(get_db)) -> Collection:
     return db.get_collection('transaction')
 
 
+def get_balance_collection(db: database.Database = Depends(get_db)) -> Collection:
+    return db.get_collection('balance')
+
+
 def get_txn_repository(txn_collection: Collection = Depends(get_txn_collection)):
     return TransactionRepository(txn_collection)
+
+
+def get_balance_repository(balance_collection: Collection = Depends(get_balance_collection)):
+    return BalanceRepository(balance_collection)
 
 
 def get_user_repository(user_collection: Collection = Depends(get_user_collection)):
@@ -49,8 +58,9 @@ def get_user_service(user_repo: UserRepository = Depends(get_user_repository)):
 
 
 def get_txn_service(user_service: UserService = Depends(get_user_service),
-                    txn_repository: TransactionRepository = Depends(get_txn_repository)):
-    return TransactionService(user_service, txn_repository)
+                    txn_repository: TransactionRepository = Depends(get_txn_repository),
+                    balance_repository: BalanceRepository = Depends(get_balance_repository)):
+    return TransactionService(user_service, txn_repository, balance_repository)
 
 
 @user_router.post("/")
