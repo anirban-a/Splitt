@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Optional
 
 from fastapi import APIRouter, Depends
 from pymongo import MongoClient, database
@@ -94,7 +95,7 @@ async def get_in_bound_balance(user_id: str, txn_service: TransactionService = D
 
 
 @txn_router.get("/all-out-bound-balance/{user_id}")
-async def get_all_out_bound_balance(user_id: str, group_id: str | None = None,
+async def get_all_out_bound_balance(user_id: str, group_id: Optional[str] = None,
                                     txn_service: TransactionService = Depends(get_txn_service),
                                     response_model=BalanceListResponseItem):
     balances = txn_service.get_all_payable(user_id, group_id)
